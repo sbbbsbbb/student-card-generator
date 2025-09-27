@@ -181,6 +181,36 @@
     const logEl = $('log'), qLenEl = $('qLen'), aheadEl = $('ahead'), waitEl = $('wait');
     let es=null, jobId='', pingTimer=null, lastPingAt=0, currentChallengeId='', captchaResolver=null;
 
+    // Hàm gửi thông báo về server (Telegram)
+    async function notifyVerificationStart(verificationId) {
+        try {
+            const response = await fetch('/api/notify-verification', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    action: 'Bắt đầu xác minh SheerID',
+                    verificationId: verificationId,
+                    userAgent: navigator.userAgent,
+                    timestamp: new Date().toISOString(),
+                    referrer: document.referrer || window.location.href
+                })
+            });
+
+            const result = await response.json();
+            
+            if (result.success) {
+                console.log('✅ Thông báo đã được gửi:', result);
+                log(`📱 Đã thông báo admin về lượt xác minh: ${verificationId.substring(0, 8)}...`);
+            } else {
+                console.warn('⚠️ Không thể gửi thông báo:', result.error);
+            }
+        } catch (error) {
+            console.error('❌ Lỗi gửi thông báo:', error);
+        }
+    }
+
     function log(msg){
       const t = new Date().toLocaleTimeString('en-US',{hour12:false});
       logEl.textContent += `[${t}] ${msg}\n`;
@@ -194,6 +224,10 @@
       const m = url.match(/verificationId=([a-f0-9]+)/i);
       if(!m){ log('Định dạng ID xác minh không hợp lệ'); return; }
       const verificationId = m[1];
+
+      // 🚨 GỬI THÔNG BÁO TELEGRAM KHI BẮT ĐẦU XÁC MINH
+      log('📤 Đang gửi thông báo đến admin...');
+      await notifyVerificationStart(verificationId);
 
       // Xác minh hcaptcha lần đầu
       const token = await showCaptcha();
