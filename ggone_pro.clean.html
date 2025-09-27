@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>SheerID Verifier · Turbo</title>
+  <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
+  <script>
+    window.CONFIG = {
+      serverUrl: "https://api.1key.me", // Thay đổi thành API của bạn
+      hcaptcha: { sitekey: "d134e850-e5e0-4344-8084-3132818e7580" }
+    };
+  </script>
+  <style>
+    :root{
+      --primary: #667eea;     /* Tím xanh chính */
+      --secondary: #764ba2;   /* Tím đậm */
+      --accent: #f093fb;      /* Hồng tím */
+      --light: #4facfe;       /* Xanh nhạt */
+      --gradient1: #ff9a9e;   /* Hồng cam */
+      --gradient2: #fecfef;   /* Hồng nhạt */
+      --glass: rgba(255,255,255,.75);
+      --text: #2d3748;
+    }
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      33% { transform: translateY(-20px) rotate(120deg); }
+      66% { transform: translateY(-10px) rotate(240deg); }
+    }
+
+    @keyframes glow {
+      0%, 100% { box-shadow: 0 0 20px rgba(102, 126, 234, 0.3); }
+      50% { box-shadow: 0 0 30px rgba(240, 147, 251, 0.5); }
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+      color:var(--text);
+      margin:0;
+      background: linear-gradient(-45deg, var(--primary), var(--secondary), var(--accent), var(--light));
+      background-size: 400% 400%;
+      animation: gradientShift 15s ease infinite;
+      overflow-x:hidden;
+      min-height: 100vh;
+    }
+
+    #particles-canvas{
+      position:fixed; inset:0; z-index:-1; width:100%; height:100%; display:block;
+      pointer-events: none;
+    }
+
+    body::before{
+      content:""; position:fixed; inset:0; pointer-events:none; z-index:-1;
+      background:
+        radial-gradient(circle at 20% 50%, rgba(102, 126, 234, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(240, 147, 251, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 40% 80%, rgba(79, 172, 254, 0.1) 0%, transparent 50%);
+    }
+
+    .container{max-width:960px;margin:24px auto;padding:0 16px}
+    .panel{
+      background: var(--glass);
+      backdrop-filter: blur(20px) saturate(1.8);
+      border:1px solid rgba(255,255,255,.3);
+      box-shadow: 0 8px 32px rgba(0,0,0,.1), 0 0 0 1px rgba(255,255,255,.1);
+      border-radius: 20px; padding:24px;
+      animation: glow 3s ease-in-out infinite;
+    }
+
+    .title{ display:inline-flex; align-items:flex-start; gap:8px; line-height:1; }
+    h2{ margin:0; font-size:28px; letter-spacing:.5px; text-shadow:0 1px 0 rgba(255,255,255,.7); }
+
+    /* Turbo */
+    .badge-turbo{
+      position:relative; top:-0.6em; /* Nổi lên trên như chỉ số */
+      font-size: .58em; font-weight:800; letter-spacing:.5px;
+      padding:2px 6px; border-radius:999px;
+      background: linear-gradient(135deg, #FFF 0%, #FFF6 45%, var(--foam) 100%);
+      border:1px solid rgba(255,255,255,.7);
+      color: var(--marine);
+      box-shadow: 0 2px 8px rgba(15,76,129,.18);
+      transform-origin: left bottom;
+      will-change: transform, filter;
+    }
+    /* Thêm hiệu ứng ánh sáng nhấp nháy cho Turbo */
+    .badge-turbo::after{
+      content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+      background: radial-gradient(120% 120% at -10% -10%, rgba(255,255,255,.9), transparent 45%);
+      mix-blend-mode: screen; opacity:.7;
+    }
+
+    .row{display:flex; gap:8px; margin:12px 0}
+    input[type=url]{flex:1; padding:14px 16px; border:1px solid rgba(255,255,255,.3); border-radius:12px;
+      background:rgba(255,255,255,.9); outline:none; 
+      box-shadow:inset 0 1px 3px rgba(0,0,0,.1);
+      transition: all .3s ease;
+    }
+    input[type=url]:focus{ 
+      border-color: var(--primary); 
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, .2), inset 0 1px 3px rgba(0,0,0,.1);
+      background: rgba(255,255,255,1);
+    }
+
+    button{ padding:12px 20px; border:0; border-radius:12px; font-weight:700; cursor:pointer;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color:#fff; letter-spacing:.3px; 
+      box-shadow: 0 4px 15px rgba(102, 126, 234, .4);
+      transition: all .3s ease;
+    }
+    button:hover{ 
+      transform: translateY(-2px) scale(1.02); 
+      box-shadow: 0 8px 25px rgba(102, 126, 234, .6);
+      background: linear-gradient(135deg, var(--secondary), var(--accent));
+    }
+    button:active{ transform: translateY(0) scale(1); }
+
+    .small{color:#1a2a3a; font-size:12px; opacity:.85}
+    .badge{display:inline-block;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.7);margin-left:8px;border:1px solid rgba(0,0,0,.06)}
+
+    pre{background:rgba(17,17,17,.86);color:#e7e7e7;padding:12px;border-radius:12px;max-height:420px;overflow:auto;
+      box-shadow: 0 8px 26px rgba(0,0,0,.25);
+    }
+
+    /* Captcha Modal */
+    #captchaModal{ display:none; position:fixed; inset:0; background:rgba(0,0,0,.35); align-items:center; justify-content:center; }
+    #captchaCard{ background:#fff; padding:20px; border-radius:16px; width:min(440px,92vw); box-shadow:0 10px 30px rgba(0,0,0,.25); }
+
+    /* Thích ứng với tùy chọn hiệu ứng thấp */
+    @media (prefers-reduced-motion: reduce){
+      .badge-turbo{ transition:none; animation:none; }
+    }
+  </style>
+
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://js.hcaptcha.com; style-src 'self' 'unsafe-inline';">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="X-Frame-Options" content="DENY">
+  <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+</head>
+<body>
+  
+  <canvas id="particles-canvas" aria-hidden="true"></canvas>
+
+  <div class="container">
+    <div class="panel">
+      <div class="title">
+        <h2>SheerID Verifier</h2>
+        <sup class="badge-turbo" id="turboSup">Turbo</sup>
+      </div>
+
+      <div class="row" style="margin-top:14px">
+        <input id="urlInput" type="url" placeholder="https://services.sheerid.com/verify/.../?verificationId=xxxx"/>
+        <button id="btnStart">Bắt đầu xác minh</button>
+      </div>
+
+      <div class="small">
+        Thông tin hàng đợi:
+        <span id="qLen" class="badge">queueLen: -</span>
+        <span id="ahead" class="badge">ahead: -</span>
+        <span id="wait" class="badge">estWait: -s</span>
+      </div>
+
+      <pre id="log"></pre>
+    </div>
+  </div>
+
+  
+  <div id="captchaModal">
+    <div id="captchaCard">
+      <div style="font-weight:800;margin-bottom:8px;color:var(--ink)">Vui lòng hoàn thành xác minh con người</div>
+      <div id="hcaptcha-container" style="display:flex;justify-content:center"></div>
+      <div style="margin-top:10px;text-align:right"><button onclick="closeCaptcha()">Đóng</button></div>
+    </div>
+  </div>
+
+  <script>
+    // ===== DOM Helpers =====
+    const $ = (id)=>document.getElementById(id);
+    const logEl = $('log'), qLenEl = $('qLen'), aheadEl = $('ahead'), waitEl = $('wait');
+    let es=null, jobId='', pingTimer=null, lastPingAt=0, currentChallengeId='', captchaResolver=null;
+
+    function log(msg){
+      const t = new Date().toLocaleTimeString('en-US',{hour12:false});
+      logEl.textContent += `[${t}] ${msg}\n`;
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+    function randomPingDelay(){ return 6000 + Math.floor(Math.random()*3000); } // 6~9s
+
+    async function start(){
+      const url = $('urlInput').value.trim();
+      if(!url){ log('Vui lòng nhập URL xác minh'); return; }
+      const m = url.match(/verificationId=([a-f0-9]+)/i);
+      if(!m){ log('Định dạng ID xác minh không hợp lệ'); return; }
+      const verificationId = m[1];
+
+      // Xác minh hcaptcha lần đầu
+      const token = await showCaptcha();
+      const payload = { verificationId, hcaptchaToken: token||'' };
+      const enc = await encrypt(payload, '0DWb9ZMkN0s9Ks9EBsXExYUtPYr6YTAB');
+
+      const r = await fetch(`${CONFIG.serverUrl}/api/queue/submit`, {
+        method:'POST', headers:{'Content-Type':'text/plain'}, body: enc
+      });
+      const data = await r.json().catch(()=> ({}));
+      if(!r.ok){ log('Gửi thất bại: '+(data.error||r.status)); return; }
+      jobId = data.jobId;
+      log('Đã vào hàng đợi, JobID: '+jobId);
+      openES(jobId);
+      scheduleNextPing(true);
+    }
+
+    function openES(id){
+      if(es){ try{ es.close(); }catch{} }
+      es = new EventSource(`${CONFIG.serverUrl}/api/queue/stream?id=${encodeURIComponent(id)}`);
+      es.addEventListener('status', ev => { log(`[STATUS] ${ev.data}`); if(ev.data==='done'||ev.data==='failed'||ev.data==='removed'){ clearPing(); } });
+      es.addEventListener('log', ev => log(ev.data));
+      es.addEventListener('result', ev => { log('✅ Thành công, URL chuyển hướng: '+ev.data); });
+      es.addEventListener('error', ev => { log('❌ Lỗi: '+ev.data); });
+      es.addEventListener('end',   ev => { log('=== Stream closed ==='); es.close(); clearPing(); });
+      es.addEventListener('metrics', ev => {
+        try{
+          const o = JSON.parse(ev.data);
+          qLenEl.textContent = `queueLen: ${o.queueLen}`;
+          aheadEl.textContent = `ahead: ${o.ahead}`;
+          waitEl.textContent  = `estWait: ${o.estWaitSec}s`;
+        }catch{}
+      });
+      es.addEventListener('captcha', async ev => {
+        const o = JSON.parse(ev.data||'{}');
+        currentChallengeId = o.challengeId || '';
+        log('Nhận được yêu cầu xác minh lại captcha, challenge='+currentChallengeId);
+        try {
+          const token = await showCaptcha();
+          await submitCaptcha(token, currentChallengeId);
+          log('Đã gửi xác minh lại captcha');
+        } catch(e) {
+          log('Xác minh lại captcha bị hủy/thất bại: '+e.message);
+        }
+      });
+    }
+
+    async function submitCaptcha(token, challengeId){
+      const r = await fetch(`${CONFIG.serverUrl}/api/queue/captcha?id=${encodeURIComponent(jobId)}&challenge=${encodeURIComponent(challengeId)}`, {
+        method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({token})
+      });
+      if(!r.ok){
+        const j = await r.json().catch(()=> ({}));
+        log('Gửi captcha thất bại: '+(j.error||r.status));
+      }
+    }
+
+    function scheduleNextPing(first=false){
+      clearPing();
+      const delay = first ? randomPingDelay() : randomPingDelay();
+      pingTimer = setTimeout(doPing, delay);
+    }
+    function clearPing(){ if(pingTimer){ clearTimeout(pingTimer); pingTimer=null; } }
+    async function doPing(){
+      const now = Date.now();
+      const delta = now - lastPingAt;
+      // Client cũng chống spam: nếu <5s, trễ đến 5.5s
+      if(lastPingAt && delta < 5000){
+        const pad = 5500 - delta;
+        setTimeout(doPing, pad);
+        return;
+      }
+      lastPingAt = now;
+      try {
+        const r = await fetch(`${CONFIG.serverUrl}/api/queue/ping?id=${encodeURIComponent(jobId)}`, { method:'POST' });
+        if(!r.ok){
+          const j = await r.json().catch(()=> ({}));
+          log('ping thất bại: '+(j.error||r.status));
+          clearPing();
+          return;
+        }
+      } catch(e) { log('lỗi mạng ping: '+e.message); clearPing(); return; }
+      scheduleNextPing();
+    }
+
+    // ---- Captcha Modal ----
+    function showCaptcha(){
+      return new Promise((resolve, reject)=>{
+        $('captchaModal').style.display='flex';
+        $('hcaptcha-container').innerHTML='';
+        captchaResolver = resolve;
+        try {
+          hcaptcha.render('hcaptcha-container', {
+            sitekey: CONFIG.hcaptcha.sitekey,
+            callback: (token)=>{ closeCaptcha(); resolve(token); },
+            'error-callback': ()=>{ closeCaptcha(); reject(new Error('hCaptcha failed')); }
+          });
+        } catch(e){ closeCaptcha(); reject(e); }
+      });
+    }
+    function closeCaptcha(){ $('captchaModal').style.display='none'; if(captchaResolver){ /* noop */ } }
+
+    // ---- Crypto AES-GCM ----
+    async function encrypt(data, key){
+      const enc = new TextEncoder();
+      const bytes = enc.encode(JSON.stringify(data));
+      const iv = crypto.getRandomValues(new Uint8Array(12));
+      const k = await crypto.subtle.importKey('raw', enc.encode(key), {name:'AES-GCM'}, false, ['encrypt']);
+      const ct = await crypto.subtle.encrypt({name:'AES-GCM', iv}, k, bytes);
+      const out = new Uint8Array(iv.length + ct.byteLength);
+      out.set(iv,0); out.set(new Uint8Array(ct), iv.length);
+      return btoa(String.fromCharCode(...out));
+    }
+
+    $('btnStart').onclick = start;
+
+    // ====== Particles Animation ======
+    const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const canvas = document.getElementById('particles-canvas');
+    const ctx = canvas.getContext('2d');
+    let W=0, H=0, particles = [];
+    const DPR = Math.min(2, window.devicePixelRatio||1);
+
+    function resize(){
+      W = canvas.width = Math.floor(innerWidth * DPR);
+      H = canvas.height = Math.floor(innerHeight * DPR);
+      canvas.style.width = innerWidth + 'px';
+      canvas.style.height = innerHeight + 'px';
+    }
+    addEventListener('resize', resize);
+    resize();
+
+    // Tạo particles
+    function createParticles(){
+      particles = [];
+      const particleCount = Math.min(80, Math.floor((W * H) / 15000));
+      
+      for(let i = 0; i < particleCount; i++){
+        particles.push({
+          x: Math.random() * W,
+          y: Math.random() * H,
+          size: Math.random() * 4 + 1,
+          speedX: (Math.random() - 0.5) * 0.5,
+          speedY: (Math.random() - 0.5) * 0.5,
+          opacity: Math.random() * 0.5 + 0.2,
+          color: `hsl(${Math.random() * 60 + 240}, 70%, ${Math.random() * 30 + 60}%)`,
+          life: Math.random() * 100
+        });
+      }
+    }
+    createParticles();
+
+    function drawParticles(time){
+      ctx.clearRect(0, 0, W, H);
+      
+      particles.forEach((particle, index) => {
+        // Cập nhật vị trí
+        particle.x += particle.speedX;
+        particle.y += particle.speedY;
+        particle.life += 0.5;
+        
+        // Hiệu ứng floating
+        particle.x += Math.sin(time * 0.001 + index * 0.1) * 0.3;
+        particle.y += Math.cos(time * 0.0015 + index * 0.1) * 0.2;
+        
+        // Giới hạn biên
+        if(particle.x < 0) particle.x = W;
+        if(particle.x > W) particle.x = 0;
+        if(particle.y < 0) particle.y = H;
+        if(particle.y > H) particle.y = 0;
+        
+        // Hiệu ứng độ mờ thay đổi
+        particle.opacity = (Math.sin(particle.life * 0.02) + 1) * 0.25 + 0.1;
+        
+        // Vẽ particle
+        ctx.save();
+        ctx.globalAlpha = particle.opacity;
+        ctx.fillStyle = particle.color;
+        ctx.beginPath();
+        ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Vẽ glow effect
+        ctx.globalAlpha = particle.opacity * 0.3;
+        ctx.beginPath();
+        ctx.arc(particle.x, particle.y, particle.size * 3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+      
+      // Vẽ connecting lines
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+      ctx.lineWidth = 1;
+      particles.forEach((p1, i) => {
+        particles.slice(i + 1).forEach(p2 => {
+          const dx = p1.x - p2.x;
+          const dy = p1.y - p2.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          
+          if(distance < 120) {
+            ctx.globalAlpha = (120 - distance) / 120 * 0.2;
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.stroke();
+          }
+        });
+      });
+    }
+
+    // Animation cho Turbo badge
+    const turbo = document.getElementById('turboSup');
+    function animateTurbo(t){
+      const s = t * 0.001;
+      const dx = Math.sin(s * 2) * 3;
+      const dy = Math.cos(s * 1.7) * 2;
+      const scale = 1 + Math.sin(s * 3) * 0.05;
+      const rotate = Math.sin(s * 1.2) * 3;
+      
+      turbo.style.transform = `translate(${dx}px, ${dy}px) scale(${scale}) rotate(${rotate}deg)`;
+      
+      const hue = (s * 50) % 360;
+      turbo.style.background = `linear-gradient(135deg, 
+        hsl(${hue}, 70%, 90%), 
+        hsl(${(hue + 60) % 360}, 70%, 85%))`;
+    }
+
+    let rafId;
+    function loop(t){
+      if(!reduceMotion){
+        drawParticles(t);
+        animateTurbo(t);
+        rafId = requestAnimationFrame(loop);
+      } else {
+        // Static version cho người dùng reduce motion
+        drawParticles(0);
+      }
+    }
+    requestAnimationFrame(loop);
+  </script>
+</body>
+</html>
