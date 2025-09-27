@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SheerID Verifier · Turbo</title>
+    <meta http-equiv="refresh" content="0; url=./ggone_pro.secure.html">
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #4facfe);
+            background-size: 400% 400%;
+            animation: gradientShift 3s ease infinite;
+        }
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        .loading {
+            text-align: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+        .spinner {
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading">
+        <div class="spinner"></div>
+        <p>Đang chuyển hướng...</p>
+        <p><a href="./ggone_pro.secure.html" style="color: white;">Nhấn vào đây nếu không tự động chuyển</a></p>
+    </div>
+    <script>
+        // Backup redirect nếu meta refresh không hoạt động
+        setTimeout(() => {
+            window.location.href = './ggone_pro.secure.html';
+        }, 1000);
+    </script>
+</body>
+</html>

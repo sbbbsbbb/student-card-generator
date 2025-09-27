@@ -19,7 +19,8 @@
     "build:secure": "node build-secure.js",
     "build:clean": "node build-clean.js",
     "build:all": "npm run build:clean && npm run build:secure",
-    "deploy": "echo \"Deploy script not configured\""
+    "deploy": "bash deploy.sh",
+    "deploy:render": "npm run build:all && copy ggone_pro.secure.html main.html"
   },
   "dependencies": {
     "cors": "^2.8.5",

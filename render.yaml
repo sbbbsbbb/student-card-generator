@@ -1,0 +1,29 @@
+# Build command để tạo static files
+build: npm run build:all
+
+# Publish directory - thư mục chứa files static
+publishDir: ./
+
+# Environment
+environment: node
+
+# Node version
+nodeVersion: 18.17.0
+
+# Custom headers cho security
+headers:
+  /*:
+    X-Frame-Options: DENY
+    X-Content-Type-Options: nosniff
+    X-XSS-Protection: 1; mode=block
+    Referrer-Policy: strict-origin-when-cross-origin
+    Permissions-Policy: camera=(), microphone=(), geolocation=()
+
+# Redirects - redirect từ file gốc sang secure version
+redirects:
+  - from: /ggone_pro.html
+    to: /ggone_pro.secure.html
+    status: 301
+  - from: /index.html
+    to: /ggone_pro.secure.html
+    status: 200
